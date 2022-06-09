@@ -1,22 +1,40 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 public class GameControl : MonoBehaviour
 {
-    public Sprite DefaultSprite;
+   
     GameObject FirstSprite;
     GameObject ButtonSprite;
     int SpriteNumber;
-   public List<GameObject> Images;
+    public int TargetAmount;
+    int SuccessAmount;
+
+    public TextMeshProUGUI Timer;
+    public float TotalTime;
+    public bool isThereTime;
+    private float Minute;
+    private float Second;
+    public Sprite DefaultSprite;
+    public AudioSource[] Voices;
+    public List<GameObject> Images;
+    public GameObject[] GamePanels;
     void Start()
     {
         SpriteNumber = -1;
     }
 
+    private void Update()
+    {
+        StartTime();
+    }
     public void TakeGameObject(GameObject MySprite)
     {
         ButtonSprite = MySprite;
+        Voices[0].Play();
         ButtonSprite.GetComponent<Image>().sprite = ButtonSprite.GetComponentInChildren<SpriteRenderer>().sprite;
         ButtonSprite.GetComponent<Image>().raycastTarget = false;
     }
@@ -39,11 +57,17 @@ public class GameControl : MonoBehaviour
 
         if (SpriteNumber == Number)
         {
-            Destroy(ButtonSprite);
-            Destroy(FirstSprite);
+            SuccessAmount++;
+            ButtonSprite.GetComponent<Image>().enabled = false;
+            FirstSprite.GetComponent<Image>().enabled = false;
+            if (TargetAmount==SuccessAmount)
+            {
+                EndGame(0);
+            }
         }
         else
         {
+            Voices[1].Play();
             ButtonSprite.GetComponent<Image>().sprite = DefaultSprite;
             FirstSprite.GetComponent<Image>().sprite = DefaultSprite;
         }
@@ -64,4 +88,35 @@ public class GameControl : MonoBehaviour
             }        
         }
     }
+
+
+    public void MainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void StartTime()
+    {
+        if (isThereTime && TotalTime > 1)
+        {
+            TotalTime -= Time.deltaTime;
+            Minute = Mathf.FloorToInt(TotalTime / 60);
+            Second = Mathf.FloorToInt(TotalTime % 60);
+            Timer.text= string.Format("{0:00}:{1:00}",Minute,Second);
+        }
+        else if (isThereTime)
+        {
+            EndGame(1);
+        }    
+    }
+
+   private void EndGame(int Value)
+    {
+        GamePanels[Value].SetActive(true);
+    }
+    
 }
