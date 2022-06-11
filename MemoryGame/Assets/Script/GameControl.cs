@@ -12,25 +12,53 @@ public class GameControl : MonoBehaviour
     int SpriteNumber;
     public int TargetAmount;
     int SuccessAmount;
-
+    int AddedSpriteValu=0;
+    int TotalSprite;
+    bool CrateFinish=true;
     public TextMeshProUGUI Timer;
     public float TotalTime;
     public bool isThereTime;
     private float Minute;
     private float Second;
     public Sprite DefaultSprite;
+    public GameObject Grid;
+    public GameObject SpritePool;
     public AudioSource[] Voices;
     public List<GameObject> Images;
     public GameObject[] GamePanels;
     void Start()
     {
         SpriteNumber = -1;
+        StartCoroutine(CreateLevel());
     }
 
     private void Update()
     {
         StartTime();
     }
+
+    IEnumerator CreateLevel()
+    {
+        yield return new WaitForSeconds(.1f);
+        while (CrateFinish)
+        {
+            TotalSprite = SpritePool.transform.childCount;
+            int RandomValue = Random.Range(0, SpritePool.transform.childCount);
+
+            if (SpritePool.transform.GetChild(RandomValue).gameObject !=null)
+            {           
+                SpritePool.transform.GetChild(RandomValue).SetParent(Grid.transform);
+                AddedSpriteValu++;
+                if (AddedSpriteValu == TotalSprite)
+                {
+                    CrateFinish = false;
+                    Destroy(SpritePool.gameObject);
+                    
+                }
+            }
+        }
+    }
+  
     public void TakeGameObject(GameObject MySprite)
     {
         ButtonSprite = MySprite;
@@ -90,9 +118,24 @@ public class GameControl : MonoBehaviour
     }
 
 
-    public void MainMenu()
+    public void MainMenu(string respond)
     {
-        SceneManager.LoadScene("MainMenu");
+        switch (respond)
+        {
+            case "Sure":
+               GamePanels[2].SetActive(true);
+                Time.timeScale = 0;
+                 break;
+            case "Yes":
+                Time.timeScale = 1;
+                SceneManager.LoadScene("MainMenu");
+                break;
+            case "No":
+                GamePanels[2].SetActive(false);
+                Time.timeScale = 1;
+                break;
+        }
+        
     }
     public void Restart()
     {
@@ -119,4 +162,6 @@ public class GameControl : MonoBehaviour
         GamePanels[Value].SetActive(true);
     }
     
+
+
 }
